@@ -1,17 +1,26 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { updateKleinSchalingHeidsChallenge } from './challenges';
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 
+export const updateChallenges = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
+    const data = getData(change);
+      // if transaction is expense and of category with id 4310 (kantoorkosten)
+    if(data.type === 'expense') {
+        if(data.category.id === '4310'){
+            return updateKleinSchalingHeidsChallenge(data,db);
+        }
+       
+    }
+    return null;
+});
+
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
-export const onTransactionWrite = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
+export const onTransactionWriteCreateQuarterOverview = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
 
-    // check if deleted
-    let data = change.after.data();
-    if(data === undefined){
-        data = change.before.data();
-    }
+    const data = getData(change);
     
     //get all transactions for quarter & create a financial overview
     return db.collection('transactions')
@@ -29,12 +38,19 @@ export const onTransactionWrite = functions.firestore.document('transactions/{id
     });
    
 });
-
+function getData(change: functions.Change<FirebaseFirestore.DocumentSnapshot>){
+ // check if deleted
+ let data = change.after.data();
+ if(data === undefined){
+     data = change.before.data();
+ }
+ return data;
+}
 function createFinancialOverview(docs:FirebaseFirestore.QueryDocumentSnapshot[]) {
 
-    let revenue = 0;
-    let expenses = 0;
-    let taxes = 0;
+    let revenue = 0.0;
+    let expenses = 0.0;
+    let taxes = 0.0;
 
     docs.forEach((item) => {
         const data = item.data();
@@ -44,7 +60,7 @@ function createFinancialOverview(docs:FirebaseFirestore.QueryDocumentSnapshot[])
             expenses += data.amount;
         }
         //calculate taxes (btw) to pay
-        taxes += (data.amount / 100) * data.btwTarif;
+        taxes += (data.amount / 100.0) * data.btwTarif;
     });
 
     return {

@@ -2,19 +2,23 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const challenges_1 = require("./challenges");
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
+exports.updateChallenges = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
+    const data = getData(change);
+    // if transaction is expense and of category with id 4310 (kantoorkosten)
+    if (data.type === 'expense') {
+        if (data.category.id === '4310') {
+            return challenges_1.updateKleinSchalingHeidsChallenge(data, db);
+        }
+    }
+    return null;
+});
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
-//
-exports.helloWorld = functions.https.onRequest((request, response) => {
-    response.send("Hello from Firebase!");
-});
-exports.onTransactionWrite = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
-    let data = change.after.data();
-    if (data === undefined) {
-        data = change.before.data();
-    }
+exports.onTransactionWriteCreateQuarterOverview = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
+    const data = getData(change);
     //get all transactions for quarter & create a financial overview
     return db.collection('transactions')
         .where('uid', '==', data.uid)
@@ -30,10 +34,18 @@ exports.onTransactionWrite = functions.firestore.document('transactions/{id}').o
         });
     });
 });
+function getData(change) {
+    // check if deleted
+    let data = change.after.data();
+    if (data === undefined) {
+        data = change.before.data();
+    }
+    return data;
+}
 function createFinancialOverview(docs) {
-    let revenue = 0;
-    let expenses = 0;
-    let taxes = 0;
+    let revenue = 0.0;
+    let expenses = 0.0;
+    let taxes = 0.0;
     docs.forEach((item) => {
         const data = item.data();
         if (data.type === 'invoice') {
@@ -43,7 +55,7 @@ function createFinancialOverview(docs) {
             expenses += data.amount;
         }
         //calculate taxes (btw) to pay
-        taxes += (data.amount / 100) * data.btwTarif;
+        taxes += (data.amount / 100.0) * data.btwTarif;
     });
     return {
         revenue, expenses, taxes
