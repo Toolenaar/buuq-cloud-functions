@@ -3,27 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const challenges_1 = require("./challenges");
-const utils_1 = require("./utils");
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 exports.updateCustomer = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
-    console.log('LOGGING');
-    const data = getData(change);
-    const eventType = utils_1.checkEventType(change);
+    return null;
+    /*const data = getData(change) as Transaction;
+    const eventType = checkEventType(change);
     return db.collection('customers').doc(data.customer.id).get().then((value) => {
-        const customer = value.data();
+        const customer = value.data() as Customer;
         //update overall cost / expese for customer
-        console.log('CUSTOMER');
-        console.log(customer);
-        const updatedCustomer = updateCustomerExpensesCosts(customer, change, eventType);
-        console.log('CUSTOMER UPDATE');
-        console.log(updatedCustomer);
-        db.collection('customers').doc(data.customer.id).set(updatedCustomer).then((value2) => {
-            // return 
+        db.collection('customers').doc(data.customer.id).set(updateCustomerExpensesCosts(customer,change,eventType)).then((value2) => {
+            // return
         }).catch((error) => {
             console.log(error);
         });
-    });
+    });*/
 });
 exports.updateChallenges = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
     const data = getData(change);
@@ -64,8 +58,6 @@ function getData(change) {
 }
 function updateCustomerExpensesCosts(customer, change, eventType) {
     const transaction = getData(change);
-    customer.revenue = customer.revenue === undefined ? 0 : customer.revenue;
-    customer.expenses = customer.expenses === undefined ? 0 : customer.expenses;
     if (eventType === 'update') {
         //if edit get the previous value and replace
         const previous = change.before.data();

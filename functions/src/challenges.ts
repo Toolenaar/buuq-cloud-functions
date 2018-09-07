@@ -1,5 +1,3 @@
-
-
 const getProgress = (docs:FirebaseFirestore.QueryDocumentSnapshot[]): number => {
     let progress = 0.0;
     docs.forEach((item) => {
