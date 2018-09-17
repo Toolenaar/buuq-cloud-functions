@@ -1,13 +1,13 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { Customer, Transaction } from './types';
-import { updateKleinSchalingHeidsChallenge } from './challenges';
+import ChallengeHelper from './challenges';
 import { checkEventType } from './utils';
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 
 export const updateCustomer = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
-    console.log('LOGGING');
+   
     const data = getData(change) as Transaction;
     const eventType = checkEventType(change);
     return db.collection('customers').doc(data.customer.id).get().then((value) => {
@@ -18,19 +18,17 @@ export const updateCustomer = functions.firestore.document('transactions/{id}').
             // return 
         }).catch((error) => {
             console.log(error);
-        });
+        });1
     });
 });
 
 export const updateChallenges = functions.firestore.document('transactions/{id}').onWrite((change, context) => {
     const data = getData(change);
-      // if transaction is expense and of category with id 4310 (kantoorkosten)
-    if(data.type === 'expense' && data.amount > 400) {
-        if(data.category.id === '4310'){
-            return updateKleinSchalingHeidsChallenge(data,db);
-        }
-    }
-    return null;
+    return ChallengeHelper.runChallenges(data,db).then((value) => {
+        //return
+    }).catch((error) => {
+        console.log(error);
+    });
 });
 
 // // Start writing Firebase Functions
@@ -103,7 +101,7 @@ function createFinancialOverview(docs:FirebaseFirestore.QueryDocumentSnapshot[])
     let expenses = 0.0;
     let taxes = 0.0;
     
-
+    //calculate taxes (btw) to pay
     docs.forEach((item) => {
         const data = item.data();
         if(data.type === 'invoice'){
@@ -112,10 +110,7 @@ function createFinancialOverview(docs:FirebaseFirestore.QueryDocumentSnapshot[])
         }else if(data.type === 'expense'){
             expenses += data.amount;
             taxes -= (data.amount / 100.0) * data.btwTarif;
-        }
-        //calculate taxes (btw) to pay
-        
-        
+        } 
     });
     const profit = revenue - expenses;
     return {
