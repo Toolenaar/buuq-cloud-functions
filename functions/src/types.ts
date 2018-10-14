@@ -24,4 +24,5 @@ export interface Transaction {
     uid: string;
     year: number;
     total?: number;
+    isDeleted: boolean;
 }

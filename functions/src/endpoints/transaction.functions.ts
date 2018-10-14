@@ -12,6 +12,7 @@ export const onTransactionWriteCreateQuarterOverview = functions.firestore.docum
     const value = await ctx.db.collection('transactions')
         .where('uid', '==', data.uid)
         .where('year', '==', data.year)
+        .where('isDeleted', '==', false)
         .where('quarter', '==', data.quarter).get();
     // create a quarter overview
     const docId = data.uid + data.year + data.quarter;
@@ -23,10 +24,6 @@ export const onTransactionWriteCreateQuarterOverview = functions.firestore.docum
     });
 
 });
-
-
-
-
 
 function createFinancialOverview(docs: FirebaseFirestore.QueryDocumentSnapshot[]) {
 
