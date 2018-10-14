@@ -17,7 +17,6 @@ export const updateCustomer = functions.firestore.document('transactions/{id}').
     }).catch((error) => {
         console.log(error);
     });
-    1;
 });
 
 function updateCustomerExpensesCosts(customer: Customer, change: functions.Change<FirebaseFirestore.DocumentSnapshot>, eventType: string): any {

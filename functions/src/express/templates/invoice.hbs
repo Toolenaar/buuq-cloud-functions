@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Buuq invoice template</title>
+  
+   <style>
+    *,
+    *:before,
+    *:after {
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Work Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.29;
+      color: #3d4872;
+      padding: 20px;
+      background-color: #f6fafe;
+    }
+    p {
+      margin: 0;
+    }
+    .invoice {
+      background-color: white;
+      max-width: 600px;
+      border-radius: 5px;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px 0 rgba(75, 80, 120, 0.1);
+      padding-bottom: 64px;
+    }
+    .container {
+      padding-left: 64px;
+      padding-right: 64px;
+      margin-right: auto;
+      margin-left: auto;
+    }
+    .header {
+      padding-top: 64px;
+      padding-bottom: 25px;
+    }
+    .container--line {
+      border-bottom:1px solid rgba(111, 125, 232, 0.2);
+    }
+    .row {
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+    .row:before, .row:after {
+      content: " ";
+      display: table;
+    }
+    .row:after {
+      clear: both;
+    }
+    .row--customer-user {
+      padding-bottom: 90px;
+    }
+    .col {
+      position: relative;
+      min-height: 1px;
+      padding-left: 10px;
+      padding-right: 10px;
+      float: left;
+    }
+    .col--half{
+      width:50%;
+    }
+    .col--left {
+      width: calc(100% - 109px);
+    }
+    .col--right {
+      width: 109px;
+    }
+    .text-lg {
+      font-weight: 600;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+    .text-lg--bottom{
+      margin-bottom: 7px;
+    }
+    .text-md {
+      font-size: 16px;
+    }
+    .text-xl{
+      font-size:22px;
+      font-weight:600;
+    }
+    .customer {
+      width: 192px;
+    }
+    .user {
+      width: 150px;
+      float: right;
+    }
+    .main {
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+    .list {
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+    }
+    .list__item {
+    }
+    .description {
+      margin-top: 4px;
+    }
+    .footer {
+      padding-top: 30px;
+      padding-bottom: 28px;
+    }
+  </style>
+</head>
+
+
+<body>
+  <div class="invoice">
+    <header class="container container--line header">
+      <div class="row row--customer-user">
+        <div class="col col--half">
+          <div class="invoice__customer customer">
+            <p><b template-id="customer-name">{{customer.companyName}}</b></p>
+            <p template-id="customer-street">-- street --</p>
+            <p template-id="customer-adres">-- address --</p>
+            <p template-id="customer-email">{{customer.email}}</p>
+          </div>
+        </div>
+
+        <div class="col col--half">
+          <div class="invoice__user user">
+            <p><b template-id="user-name">{{user.companyName}}</b></p>
+            <p template-id="user-street">-- street --</p>
+            <p template-id="user-adres">-- address --</p>
+            <p template-id="user-email">{{user.email}}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col col--half">
+          <p class="text-lg text-lg--bottom">Factuur</p>
+          <p
+            template-id="invoice-id"
+            class="text-md">
+            {{invoice.nr}}
+          </p>
+        </div>
+
+        <div class="col col--half">
+          <p class="text-lg text-lg--bottom">Factuurdatum</p>
+          <p
+            template-id="invoice-date"
+            class="text-md">
+            {{financials.date}}
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main class="container container--line main">
+      <ul template-id="items-container" class="list">
+        <li template-id="invoice-item" class="list__item row">
+          <p
+            template-id="invoice-item-description"
+            class="col col--left text-md description">
+            {{invoice.shortDescription}}
+          </p>
+
+          <div class="list__amount col col--right">
+            <p
+              template-id="invoice-item-amount"
+              class="text-xl">
+              {{financials.amount}}
+            </p>
+          </div>
+        </li>
+      </ul>
+    </main>
+
+    <footer class="container container--line footer">
+      <div class="total row">
+        <p class="col col--left text-md description">Te betalen bedrag incl. BTW</p>
+        <p
+          template-id="invoice-total-amount"
+          class="col col--right text-xl">
+           {{financials.total}}    
+        </p>
+      </div> 
+    </footer>
+  </div>
+</body>
+</html>

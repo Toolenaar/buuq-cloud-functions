@@ -23,7 +23,6 @@ exports.updateCustomer = functions.firestore.document('transactions/{id}').onWri
     }).catch((error) => {
         console.log(error);
     });
-    1;
 }));
 function updateCustomerExpensesCosts(customer, change, eventType) {
     const transaction = utils_1.getData(change);

@@ -23,4 +23,5 @@ export interface Transaction {
     type: string;
     uid: string;
     year: number;
+    total?: number;
 }
