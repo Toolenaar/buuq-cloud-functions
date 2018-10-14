@@ -1,0 +1,1 @@
+{"version":3,"file":"context.js","sourceRoot":"","sources":["../../src/logic/context.ts"],"names":[],"mappings":";;AAAA,gDAAgD;AAChD,wCAAwC;AACxC,KAAK,CAAC,aAAa,CAAC,SAAS,CAAC,MAAM,EAAE,CAAC,QAAQ,CAAC,CAAC;AACjD,MAAM,EAAE,GAAG,KAAK,CAAC,SAAS,EAAE,CAAC;AAC7B,MAAM,OAAO,GAAG,KAAK,CAAC,OAAO,EAAE,CAAC;AAChC,kBAAe;IACX,KAAK;IACL,EAAE;IACF,OAAO;CACV,CAAC"}
