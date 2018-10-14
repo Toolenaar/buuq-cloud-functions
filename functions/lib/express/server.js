@@ -66,7 +66,7 @@ const createPdf = (data, res) => __awaiter(this, void 0, void 0, function* () {
     });
 });
 // Runs before every route. Launches headless Chrome.
-app.all('/pdf', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+app.all('/pdf/:id', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     // Note: --no-sandbox is required in this env.
     // Could also launch chrome and reuse the instance
     // using puppeteer.connect()
@@ -75,8 +75,8 @@ app.all('/pdf', (req, res, next) => __awaiter(this, void 0, void 0, function* ()
     });
     next(); // pass control to next route.
 }));
-app.post('/pdf', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    const { id } = req.body;
+app.get('/pdf/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    const { id } = req.params;
     if (id === undefined || id === '') {
         res.status(404).send({ error: 'id not valid' });
     }
@@ -96,6 +96,7 @@ app.post('/pdf', (req, res) => __awaiter(this, void 0, void 0, function* () {
             }
         }
         catch (e) {
+            console.log(e);
             res.status(500).send({ error: e });
         }
     }

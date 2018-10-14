@@ -50,7 +50,6 @@ const createFinancials = (invoice: Transaction) => {
   const amount = '€'+Number(invoice.amount).toLocaleString("nl-NL", {minimumFractionDigits: 2})
   return {total, amount,date:formatDate(invoice.date)};
 }
-
 const createPdf = async (data: any,res: express.Response): Promise<Buffer> => {
   const browser = res.locals.browser as Browser;
   const page = await browser.newPage();
@@ -65,7 +64,7 @@ const createPdf = async (data: any,res: express.Response): Promise<Buffer> => {
 }
 
 // Runs before every route. Launches headless Chrome.
-app.all('/pdf', async (req, res, next) => {
+app.all('/pdf/:id', async (req, res, next) => {
   // Note: --no-sandbox is required in this env.
   // Could also launch chrome and reuse the instance
   // using puppeteer.connect()
@@ -74,9 +73,8 @@ app.all('/pdf', async (req, res, next) => {
   });
   next(); // pass control to next route.
 });
-app.post('/pdf', async (req: express.Request, res: express.Response) => {
-  const { id } = req.body;
-
+app.get('/pdf/:id', async (req: express.Request, res: express.Response) => {
+  const { id } = req.params;
   if (id === undefined || id === '') {
     res.status(404).send({ error: 'id not valid' });
   } else {
@@ -94,6 +92,7 @@ app.post('/pdf', async (req: express.Request, res: express.Response) => {
         res.send(await createPdf(data,res));
       }
     } catch (e) {
+      console.log(e);
       res.status(500).send({ error: e });
     }
   }
