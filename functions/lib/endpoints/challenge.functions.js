@@ -12,10 +12,10 @@ const functions = require("firebase-functions");
 const challenges_1 = require("../logic/challenges");
 const utils_1 = require("../logic/utils");
 const context_1 = require("../logic/context");
-exports.updateChallenges = functions.firestore.document('transactions/{id}').onWrite((change, context) => __awaiter(this, void 0, void 0, function* () {
-    const data = utils_1.getData(change);
+exports.updateChallenges = functions.region('europe-west1').firestore.document('transactions/{id}').onWrite((change, context) => __awaiter(this, void 0, void 0, function* () {
+    const data = utils_1.default.getData(change);
     try {
-        const value = yield challenges_1.default.runChallenges(data, context_1.default.db);
+        yield challenges_1.default.runChallenges(data, context_1.default.db);
     }
     catch (error) {
         console.log(error);

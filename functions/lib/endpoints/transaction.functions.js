@@ -13,8 +13,8 @@ const context_1 = require("../logic/context");
 const utils_1 = require("../logic/utils");
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
-exports.onTransactionWriteCreateQuarterOverview = functions.firestore.document('transactions/{id}').onWrite((change, context) => __awaiter(this, void 0, void 0, function* () {
-    const data = utils_1.getData(change);
+exports.onTransactionWriteCreateQuarterOverview = functions.region('europe-west1').firestore.document('transactions/{id}').onWrite((change, context) => __awaiter(this, void 0, void 0, function* () {
+    const data = utils_1.default.getData(change);
     //get all transactions for quarter & create a financial overview
     const value = yield context_1.default.db.collection('transactions')
         .where('uid', '==', data.uid)
@@ -38,12 +38,12 @@ function createFinancialOverview(docs) {
     docs.forEach((item) => {
         const data = item.data();
         if (data.type === 'invoice') {
-            revenue += data.amount;
-            taxes += (data.amount / 100.0) * data.btwTarif;
+            revenue += utils_1.default.revenueAmountForLines(data.lines);
+            taxes += utils_1.default.taxedAmountForLines(data.lines);
         }
         else if (data.type === 'expense') {
-            expenses += data.amount;
-            taxes -= (data.amount / 100.0) * data.btwTarif;
+            expenses += utils_1.default.revenueAmountForLines(data.lines);
+            taxes -= utils_1.default.taxedAmountForLines(data.lines);
         }
     });
     const profit = revenue - expenses;

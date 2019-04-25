@@ -15,7 +15,7 @@ const sharp = require("sharp");
 const fs = require("fs-extra");
 const context_1 = require("../logic/context");
 //https://angularfirebase.com/lessons/image-thumbnail-resizer-cloud-function/
-exports.onImageAdded = functions.storage.object().onFinalize((object, context) => __awaiter(this, void 0, void 0, function* () {
+exports.onImageAdded = functions.region('europe-west1').storage.object().onFinalize((object, context) => __awaiter(this, void 0, void 0, function* () {
     // https://www.youtube.com/watch?v=YGsmWKMMiYs
     const bucket = context_1.default.storage.bucket(object.bucket);
     const filePath = object.name;

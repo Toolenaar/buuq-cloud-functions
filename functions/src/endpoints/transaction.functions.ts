@@ -1,12 +1,13 @@
 import * as functions from 'firebase-functions';
 import ctx from '../logic/context';
-import { getData } from '../logic/utils';
+import Utils from '../logic/utils';
+import { Transaction } from '../types';
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
-export const onTransactionWriteCreateQuarterOverview = functions.firestore.document('transactions/{id}').onWrite(async (change, context) => {
+export const onTransactionWriteCreateQuarterOverview = functions.region('europe-west1').firestore.document('transactions/{id}').onWrite(async (change, context) => {
 
-    const data = getData(change);
+    const data = Utils.getData(change);
 
     //get all transactions for quarter & create a financial overview
     const value = await ctx.db.collection('transactions')
@@ -33,13 +34,13 @@ function createFinancialOverview(docs: FirebaseFirestore.QueryDocumentSnapshot[]
 
     //calculate taxes (btw) to pay
     docs.forEach((item) => {
-        const data = item.data();
+        const data = item.data() as Transaction;
         if (data.type === 'invoice') {
-            revenue += data.amount
-            taxes += (data.amount / 100.0) * data.btwTarif;
+            revenue += Utils.revenueAmountForLines(data.lines);
+            taxes += Utils.taxedAmountForLines(data.lines);
         } else if (data.type === 'expense') {
-            expenses += data.amount;
-            taxes -= (data.amount / 100.0) * data.btwTarif;
+            expenses += Utils.revenueAmountForLines(data.lines);
+            taxes -= Utils.taxedAmountForLines(data.lines);
         }
     });
     const profit = revenue - expenses;

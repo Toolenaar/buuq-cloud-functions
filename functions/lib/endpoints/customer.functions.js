@@ -14,9 +14,9 @@ const utils_1 = require("../logic/utils");
 /**
  * when a new customer is added,edited update the details of the user to include total amount earned spent on that customer
  */
-exports.updateCustomer = functions.firestore.document('transactions/{id}').onWrite((change, context) => __awaiter(this, void 0, void 0, function* () {
-    const data = utils_1.getData(change);
-    const eventType = utils_1.checkEventType(change);
+exports.updateCustomer = functions.region('europe-west1').firestore.document('transactions/{id}').onWrite((change, context) => __awaiter(this, void 0, void 0, function* () {
+    const data = utils_1.default.getData(change);
+    const eventType = utils_1.default.checkEventType(change);
     const value = yield context_1.default.db.collection('customers').doc(data.customer.id).get();
     const customer = value.data();
     //update overall cost / expese for customer
@@ -35,7 +35,7 @@ exports.updateCustomer = functions.firestore.document('transactions/{id}').onWri
  */
 function updateCustomerExpensesCosts(customer, change, eventType) {
     return __awaiter(this, void 0, void 0, function* () {
-        const transaction = utils_1.getData(change);
+        const transaction = utils_1.default.getData(change);
         const transactionsForCustomer = yield context_1.default.db.collection('transactions')
             .where('customer.id', '==', customer.id)
             .where('isDeleted', '==', false).get();

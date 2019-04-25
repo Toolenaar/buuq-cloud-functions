@@ -9,7 +9,12 @@ export interface Customer {
     expenses: number;
     revenue: number;
 }
-
+export interface TransactionLine {
+    amount: number;
+    shortDescription: string;
+    btwTarif: number;
+    btwVerlegd: string;
+}
 export interface Transaction {
     amount: number;
     btwTarif: number;
@@ -17,6 +22,7 @@ export interface Transaction {
     creationDate: any;
     customer: Customer;
     date: any;
+    lines: TransactionLine[]
     nr: string;
     quarter: number;
     shortDescription: string;

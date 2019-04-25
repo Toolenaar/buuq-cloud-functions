@@ -8,17 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// https://medium.com/@ebidel/puppeteering-in-firebase-google-cloud-functions-76145c7662bd
-const express = require("express");
-const puppeteer = require('puppeteer-core');
-//import  * as  puppeteer  from 'puppeteer';
+const functions = require("firebase-functions");
+const chromium = require('chrome-aws-lambda');
+const puppeteer = require("puppeteer-core");
 const handlebars = require("handlebars");
 const fs = require("fs-extra");
 const path = require("path");
 const context_1 = require("../logic/context");
-const app = express();
+//const admin = require('firebase-admin');
+//https://github.com/GoogleChrome/puppeteer/issues/3120
 const compile = (templateName, data) => __awaiter(this, void 0, void 0, function* () {
-    const filePath = path.join(process.cwd(), 'src/express/templates', `${templateName}.hbs`);
+    const filePath = path.join(process.cwd(), 'src/templates', `${templateName}.hbs`);
     const html = yield fs.readFile(filePath, 'utf-8');
     return handlebars.compile(html)(data);
 });
@@ -54,8 +54,7 @@ const createFinancials = (invoice) => {
     const amount = '€' + Number(invoice.amount).toLocaleString("nl-NL", { minimumFractionDigits: 2 });
     return { total, amount, date: formatDate(invoice.date) };
 };
-const createPdf = (data, res) => __awaiter(this, void 0, void 0, function* () {
-    const browser = res.locals.browser;
+const createPdf = (data, browser) => __awaiter(this, void 0, void 0, function* () {
     const page = yield browser.newPage();
     const content = yield compile('invoice', data);
     yield page.setContent(content);
@@ -67,23 +66,26 @@ const createPdf = (data, res) => __awaiter(this, void 0, void 0, function* () {
     });
     return pdf;
 });
-// Runs before every route. Launches headless Chrome.
-app.all('/pdf/:id', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-    // Note: --no-sandbox is required in this env.
-    // Could also launch chrome and reuse the instance
-    // using puppeteer.connect()
-    res.locals.browser = yield puppeteer.launch({
-        args: ['--no-sandbox']
-    });
-    next(); // pass control to next route.
-}));
-app.get('/pdf/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    const { id } = req.params;
-    if (id === undefined || id === '') {
-        res.status(404).send({ error: 'id not valid' });
-    }
-    else {
-        try {
+exports.generatePdf = functions.region('europe-west1').runWith({
+    timeoutSeconds: 300,
+    memory: '2GB'
+}).https.onRequest((request, res) => __awaiter(this, void 0, void 0, function* () {
+    // const apiKey = request.get('x-api-key');
+    const id = request.body.id;
+    //create headless chrome
+    let result = null;
+    let browser = null;
+    try {
+        browser = yield puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: yield chromium.executablePath,
+            headless: chromium.headless,
+        });
+        if (id === undefined || id === '') {
+            res.status(404).send({ error: 'id not valid' });
+        }
+        else {
             const data = yield fetchdata(id);
             if (data === null || data.invoice === undefined || data.invoice.type !== 'invoice') {
                 res.status(404).send({ error: 'transaction not found' });
@@ -94,15 +96,18 @@ app.get('/pdf/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
                 const filename = id + ".pdf";
                 res.set('Content-disposition', 'attachment; filename=' + filename);
                 res.type('application/pdf');
-                res.send(yield createPdf(data, res));
+                result = yield createPdf(data, browser);
             }
         }
-        catch (e) {
-            console.log(e);
-            res.status(500).send({ error: e });
+    }
+    catch (error) {
+        throw error;
+    }
+    finally {
+        if (browser !== null) {
+            yield browser.close();
         }
     }
-    yield res.locals.browser.close();
+    return res.send(result);
 }));
-exports.default = app;
-//# sourceMappingURL=server.js.map
+//# sourceMappingURL=pdf.functions.js.map

@@ -6,7 +6,7 @@ import * as fs from 'fs-extra';
 import ctx from '../logic/context';
 
 //https://angularfirebase.com/lessons/image-thumbnail-resizer-cloud-function/
-export const onImageAdded = functions.storage.object().onFinalize(async (object, context) => {
+export const onImageAdded = functions.region('europe-west1').storage.object().onFinalize(async (object, context) => {
     // https://www.youtube.com/watch?v=YGsmWKMMiYs
     const bucket = ctx.storage.bucket(object.bucket);
     const filePath = object.name;

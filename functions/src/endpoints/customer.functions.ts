@@ -1,15 +1,15 @@
 import * as functions from 'firebase-functions';
 import ctx from '../logic/context';
 import { Transaction, Customer } from '../types';
-import { getData, checkEventType } from '../logic/utils';
+import Utils from '../logic/utils';
 
 /**
  * when a new customer is added,edited update the details of the user to include total amount earned spent on that customer
  */
-export const updateCustomer = functions.firestore.document('transactions/{id}').onWrite(async (change, context) => {
+export const updateCustomer = functions.region('europe-west1').firestore.document('transactions/{id}').onWrite(async (change, context) => {
 
-    const data = getData(change) as Transaction;
-    const eventType = checkEventType(change);
+    const data = Utils.getData(change) as Transaction;
+    const eventType = Utils.checkEventType(change);
     const value = await ctx.db.collection('customers').doc(data.customer.id).get();
     const customer = (value.data() as Customer);
     //update overall cost / expese for customer
@@ -28,7 +28,7 @@ export const updateCustomer = functions.firestore.document('transactions/{id}').
  * @param eventType 
  */
 async function updateCustomerExpensesCosts(customer: Customer, change: functions.Change<FirebaseFirestore.DocumentSnapshot>, eventType: string) {
-    const transaction = getData(change) as Transaction;
+    const transaction = Utils.getData(change) as Transaction;
     const transactionsForCustomer = await ctx.db.collection('transactions')
     .where('customer.id', '==', customer.id)
     .where('isDeleted', '==', false).get();
