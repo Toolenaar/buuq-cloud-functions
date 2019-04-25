@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const functions = require("firebase-functions");
-const chromium = require('chrome-aws-lambda');
-const puppeteer = require("puppeteer-core");
+//const chromium = require('chrome-aws-lambda');
+const puppeteer = require("puppeteer");
 const handlebars = require("handlebars");
 const fs = require("fs-extra");
 const path = require("path");
@@ -76,12 +76,13 @@ exports.generatePdf = functions.region('europe-west1').runWith({
     let result = null;
     let browser = null;
     try {
-        browser = yield puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: yield chromium.executablePath,
-            headless: chromium.headless,
-        });
+        // browser = await puppeteer.launch({
+        //     args: chromium.args,
+        //     defaultViewport: chromium.defaultViewport,
+        //     executablePath: await chromium.executablePath,
+        //     headless: chromium.headless,
+        // });
+        browser = yield puppeteer.launch({ args: ['--no-sandbox'] });
         if (id === undefined || id === '') {
             res.status(404).send({ error: 'id not valid' });
         }

@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
-const chromium = require('chrome-aws-lambda');
-import * as puppeteer from 'puppeteer-core';
+//const chromium = require('chrome-aws-lambda');
+import * as puppeteer from 'puppeteer';
 
 import * as handlebars from 'handlebars';
 import * as fs from 'fs-extra';
@@ -79,13 +79,13 @@ export const generatePdf = functions.region('europe-west1').runWith({
     let browser = null;
 
     try {
-        browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath,
-            headless: chromium.headless,
-        });
-
+        // browser = await puppeteer.launch({
+        //     args: chromium.args,
+        //     defaultViewport: chromium.defaultViewport,
+        //     executablePath: await chromium.executablePath,
+        //     headless: chromium.headless,
+        // });
+        browser = await puppeteer.launch({args: ['--no-sandbox']});
         if (id === undefined || id === '') {
             res.status(404).send({ error: 'id not valid' });
         } else {

@@ -20,14 +20,16 @@
     "fs-extra": "^7.0.1",
     "handlebars": "^4.1.2",
     "iltorb": "^2.4.3",
+    "puppeteer": "^1.14.0",
     "puppeteer-core": "^1.14.0",
     "sharp": "^0.22.0"
   },
   "devDependencies": {
-    "@types/iltorb": "^2.3.0",
-    "@types/puppeteer-core": "^1.9.0",
     "@types/fs-extra": "^5.0.5",
     "@types/handlebars": "^4.1.0",
+    "@types/iltorb": "^2.3.0",
+    "@types/puppeteer": "^1.12.3",
+    "@types/puppeteer-core": "^1.9.0",
     "@types/sharp": "^0.22.1",
     "tslint": "~5.16.0",
     "typescript": "~3.4.4"
