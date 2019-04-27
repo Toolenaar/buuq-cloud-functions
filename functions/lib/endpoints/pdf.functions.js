@@ -15,8 +15,17 @@ const handlebars = require("handlebars");
 const fs = require("fs-extra");
 const path = require("path");
 const context_1 = require("../logic/context");
+const utils_1 = require("../logic/utils");
 //const admin = require('firebase-admin');
 //https://github.com/GoogleChrome/puppeteer/issues/3120
+//https://handlebarsjs.com/
+handlebars.registerHelper('list', function (items, options) {
+    let out = '<ul template-id="items-container" class="list">';
+    for (let i = 0, l = items.length; i < l; i++) {
+        out = out + '<li template-id="invoice-item" class="list__item row">' + options.fn(items[i]) + "</li>";
+    }
+    return out + "</ul>";
+});
 const compile = (templateName, data) => __awaiter(this, void 0, void 0, function* () {
     const filePath = path.join(process.cwd(), 'src/templates', `${templateName}.hbs`);
     const html = yield fs.readFile(filePath, 'utf-8');
@@ -30,13 +39,13 @@ const fetchdata = (id) => __awaiter(this, void 0, void 0, function* () {
         return null;
     }
     // fetch the user data
-    const userSnap = yield context_1.default.db.collection('users').where('uid', '==', invoice.uid).get();
-    const user = userSnap.docs[0].data();
+    const userSnap = yield context_1.default.db.collection('users').doc(invoice.uid).get();
+    const user = userSnap.data();
     if (user === null || user === undefined) {
         return null;
     }
     // fetch the customer data
-    const customerSnap = yield context_1.default.db.collection('customers').doc(invoice.customer.id).get();
+    const customerSnap = yield context_1.default.db.collection('users').doc(invoice.uid).collection('customers').doc(invoice.customer.id).get();
     const customer = customerSnap.data();
     if (customer === null || customer === undefined) {
         return null;
@@ -49,10 +58,44 @@ const formatDate = (timestamp) => {
         d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 };
 const createFinancials = (invoice) => {
-    const totalAmount = invoice.amount + ((invoice.amount / 100) * invoice.btwTarif);
-    const total = '€' + Number(totalAmount).toLocaleString("nl-NL", { minimumFractionDigits: 2 });
-    const amount = '€' + Number(invoice.amount).toLocaleString("nl-NL", { minimumFractionDigits: 2 });
-    return { total, amount, date: formatDate(invoice.date) };
+    let lines = [];
+    let totalAmount = 0;
+    let totalBtw = [];
+    //for each line show/calculate
+    //amount
+    // btw tarif
+    // total btw (per tarif)
+    // total amount of all
+    for (let line of invoice.lines) {
+        const btw = ((line.amount / 100) * line.btwTarif);
+        line.btw = btw;
+        line.totalAmount = line.amount + btw;
+        //for each btw tarif save total amount
+        const key = line.btwTarif.toString();
+        let totalBtwItem = totalBtw.find((f) => f.key === key);
+        if (totalBtwItem === undefined || totalBtwItem === null) {
+            totalBtw.push({ 'key': key, 'tarif': line.btwTarif, 'amount': line.amount, 'btw': btw });
+        }
+        else {
+            totalBtwItem.btw += btw;
+            totalBtwItem.amount += line.amount;
+        }
+        totalAmount += line.totalAmount;
+        lines.push({
+            'shortDescription': line.shortDescription,
+            'btwTarif': line.btwTarif + '%',
+            'amount': utils_1.default.formatFinancialAmount(line.amount)
+        });
+        console.log(line);
+    }
+    for (let item of totalBtw) {
+        item.btwDisplay = utils_1.default.formatFinancialAmount(item.btw);
+        item.display = `${item.tarif}% over ${utils_1.default.formatFinancialAmount(item.amount)}`;
+    }
+    // const totalAmount = invoice.amount + ((invoice.amount / 100) * invoice.btwTarif);
+    const total = utils_1.default.formatFinancialAmount(totalAmount);
+    //const amount = '€' + Number(invoice.amount).toLocaleString("nl-NL", { minimumFractionDigits: 2 })
+    return { total, date: formatDate(invoice.date), btw: totalBtw, lines };
 };
 const createPdf = (data, browser) => __awaiter(this, void 0, void 0, function* () {
     const page = yield browser.newPage();
@@ -93,7 +136,7 @@ exports.generatePdf = functions.region('europe-west1').runWith({
             }
             else {
                 data.financials = createFinancials(data.invoice);
-                console.log(data);
+                console.log(data.financials.btw);
                 const filename = id + ".pdf";
                 res.set('Content-disposition', 'attachment; filename=' + filename);
                 res.type('application/pdf');

@@ -1,12 +1,13 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>Buuq invoice template</title>
-  
-   <style>
+
+  <style>
     *,
     *:before,
     *:after {
@@ -14,6 +15,7 @@
       -moz-box-sizing: border-box;
       box-sizing: border-box;
     }
+
     body {
       font-family: 'Work Sans', sans-serif;
       font-size: 14px;
@@ -22,9 +24,11 @@
       padding: 20px;
       background-color: #f6fafe;
     }
+
     p {
       margin: 0;
     }
+
     .invoice {
       background-color: white;
       max-width: 600px;
@@ -33,33 +37,42 @@
       box-shadow: 0 0 10px 0 rgba(75, 80, 120, 0.1);
       padding-bottom: 64px;
     }
+
     .container {
       padding-left: 64px;
       padding-right: 64px;
       margin-right: auto;
       margin-left: auto;
     }
+
     .header {
       padding-top: 64px;
       padding-bottom: 25px;
     }
+
     .container--line {
-      border-bottom:1px solid rgba(111, 125, 232, 0.2);
+      border-bottom: 1px solid rgba(111, 125, 232, 0.2);
     }
+
     .row {
       margin-left: -10px;
       margin-right: -10px;
     }
-    .row:before, .row:after {
+
+    .row:before,
+    .row:after {
       content: " ";
       display: table;
     }
+
     .row:after {
       clear: both;
     }
+
     .row--customer-user {
       padding-bottom: 90px;
     }
+
     .col {
       position: relative;
       min-height: 1px;
@@ -67,54 +80,74 @@
       padding-right: 10px;
       float: left;
     }
-    .col--half{
-      width:50%;
+
+    .col--half {
+      width: 50%;
     }
+
     .col--left {
       width: calc(100% - 109px);
     }
+
     .col--right {
       width: 109px;
     }
+
     .text-lg {
       font-weight: 600;
       font-size: 20px;
       line-height: 1.2;
     }
-    .text-lg--bottom{
+
+    .text-lg--bottom {
       margin-bottom: 7px;
     }
+
     .text-md {
       font-size: 16px;
     }
-    .text-xl{
-      font-size:22px;
-      font-weight:600;
+
+    .text-xl {
+      font-size: 22px;
+      font-weight: 600;
     }
+
     .customer {
       width: 192px;
     }
+
     .user {
       width: 150px;
       float: right;
     }
+
     .main {
       padding-top: 40px;
       padding-bottom: 40px;
     }
+
     .list {
       padding: 0;
       margin: 0;
       list-style-type: none;
     }
-    .list__item {
-    }
+
+    .list__item {}
+
     .description {
       margin-top: 4px;
     }
+
     .footer {
       padding-top: 30px;
       padding-bottom: 28px;
+    }
+
+    .list__amount {}
+
+    .pull-right {
+      text-align: end;
+      float: right;
     }
   </style>
 </head>
@@ -146,54 +179,74 @@
       <div class="row">
         <div class="col col--half">
           <p class="text-lg text-lg--bottom">Factuur</p>
-          <p
-            template-id="invoice-id"
-            class="text-md">
+          <p template-id="invoice-id" class="text-md">
             {{invoice.nr}}
           </p>
         </div>
 
         <div class="col col--half">
           <p class="text-lg text-lg--bottom">Factuurdatum</p>
-          <p
-            template-id="invoice-date"
-            class="text-md">
+          <p template-id="invoice-date" class="text-md">
             {{financials.date}}
           </p>
         </div>
       </div>
     </header>
 
-    <main class="container container--line main">
-      <ul template-id="items-container" class="list">
-        <li template-id="invoice-item" class="list__item row">
-          <p
-            template-id="invoice-item-description"
-            class="col col--left text-md description">
-            {{invoice.shortDescription}}
+    <section class="container container--line main">
+      {{#list financials.lines}}
+      <div class="row">
+        <div class="col col--half">
+          <p template-id="invoice-item-description" class="text-md description">
+            {{shortDescription}}
           </p>
+        </div>
+        <div class="list__amount pull-right col col--half">
+          <p template-id="invoice-item-amount" class="text-lg">
+            {{amount}} <span class="text-lg">({{btwTarif}})</span>
+          </p>
+        </div>
+      </div>
+      {{/list}}
 
-          <div class="list__amount col col--right">
-            <p
-              template-id="invoice-item-amount"
-              class="text-xl">
-              {{financials.amount}}
-            </p>
-          </div>
-        </li>
-      </ul>
-    </main>
+    </section>
+    <section class="container container--line main">
+      {{#list financials.btw}}
+      <div class="row">
+        <div class="col col--half">
+          <p template-id="invoice-item-description" class="text-md description">
+            {{display}}
+          </p>
+        </div>
+        <div class="list__amount pull-right col col--half">
+          <p template-id="invoice-item-amount" class="text-lg">
+            {{btwDisplay}}
+          </p>
+        </div>
+      </div>
+      {{/list}}
+    </section>
 
-    <footer class="container container--line footer">
-      <div class="total row">
-        <p class="col col--left text-md description">Te betalen bedrag incl. BTW</p>
-        <p
-          template-id="invoice-total-amount"
-          class="col col--right text-xl">
-           {{financials.total}}    
+    <section class="container container--line main">
+      <div class="row">
+        <div class="col col--half list">
+          <p template-id="invoice-item-description" class="text-md description">
+           Te betalen bedrag incl. BTW
+          </p>
+        </div>
+        <div class="list__amount pull-right col col--half list">
+          <p template-id="invoice-item-amount" class="text-lg">
+            {{financials.total}}
+          </p>
+        </div>
+      {{!-- <div class="total row">
+        <p class="col col--half text-md description">Te betalen bedrag incl. BTW</p>
+        <p template-id="invoice-total-amount" class="col col--half text-lg pull-right">
+          {{financials.total}}
         </p>
-      </div> 
-    </footer>
+      </div> --}}
+    </section>
   </div>
 </body>
+
 </html>

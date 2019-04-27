@@ -14,6 +14,8 @@ export interface TransactionLine {
     shortDescription: string;
     btwTarif: number;
     btwVerlegd: string;
+    btw: number;
+    totalAmount: number;
 }
 export interface Transaction {
     amount: number;

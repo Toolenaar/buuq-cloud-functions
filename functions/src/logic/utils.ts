@@ -5,7 +5,9 @@ import * as functions from 'firebase-functions';
 import { TransactionLine } from '../types';
 
 export default class Utils {
-
+    static formatFinancialAmount(amount:number): string{
+        return '€' + Number(amount).toLocaleString('nl-NL', { minimumFractionDigits: 2 })
+    }
     static revenueAmountForLines(lines: TransactionLine[]): number {
         let total = 0;
         lines.forEach((line: TransactionLine) => {

@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Utils {
+    static formatFinancialAmount(amount) {
+        return '€' + Number(amount).toLocaleString('nl-NL', { minimumFractionDigits: 2 });
+    }
     static revenueAmountForLines(lines) {
         let total = 0;
         lines.forEach((line) => {
