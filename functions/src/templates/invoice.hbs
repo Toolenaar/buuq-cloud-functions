@@ -159,19 +159,22 @@
       <div class="row row--customer-user">
         <div class="col col--half">
           <div class="invoice__customer customer">
-            <p><b template-id="customer-name">{{customer.companyName}}</b></p>
-            <p template-id="customer-street">-- street --</p>
-            <p template-id="customer-adres">-- address --</p>
-            <p template-id="customer-email">{{customer.email}}</p>
+            <p><b template-id="customer-name">{{customer.businessDetails.name}}</b></p>
+            <p template-id="customer-street">{{customer.businessDetails.addressLine}}</p>
+            <p template-id="customer-adres">{{customer.businessDetails.postcode}}, {{customer.businessDetails.city}}</p>
+            <p template-id="customer-email">{{customer.businessDetails.email}}</p>
           </div>
         </div>
-
         <div class="col col--half">
           <div class="invoice__user user">
-            <p><b template-id="user-name">{{user.companyName}}</b></p>
-            <p template-id="user-street">-- street --</p>
-            <p template-id="user-adres">-- address --</p>
-            <p template-id="user-email">{{user.email}}</p>
+            <p><b template-id="user-name">{{user.businessDetails.name}}</b></p>
+            <p template-id="user-street">{{user.businessDetails.addressLine}}</p>
+            <p template-id="user-adres">{{customer.businessDetails.postcode}}, {{customer.businessDetails.city}}</p>
+            <p template-id="user-email">{{user.businessDetails.email}}</p>
+            </br>
+            <p>kvk: {{user.businessDetails.kvkNr}}</p>
+            <p>btw: {{user.businessDetails.btwNr}}</p>
+            <p>{{user.businessDetails.bankAccountNr}}</p>
           </div>
         </div>
       </div>
@@ -231,7 +234,7 @@
       <div class="row">
         <div class="col col--half list">
           <p template-id="invoice-item-description" class="text-md description">
-           Te betalen bedrag incl. BTW
+            Te betalen bedrag incl. BTW
           </p>
         </div>
         <div class="list__amount pull-right col col--half list">
@@ -239,7 +242,7 @@
             {{financials.total}}
           </p>
         </div>
-      {{!-- <div class="total row">
+        {{!-- <div class="total row">
         <p class="col col--half text-md description">Te betalen bedrag incl. BTW</p>
         <p template-id="invoice-total-amount" class="col col--half text-lg pull-right">
           {{financials.total}}

@@ -28,6 +28,7 @@ const compile = async (templateName: string, data: any) => {
     const html = await fs.readFile(filePath, 'utf-8');
     return handlebars.compile(html)(data);
 }
+
 const fetchdata = async (id: string): Promise<any> => {
     // fetch the invoice
     const invoiceSnap = await ctx.db.collection('transactions').doc(id).get();
@@ -53,11 +54,13 @@ const fetchdata = async (id: string): Promise<any> => {
 
     return { invoice, user, customer };
 }
+
 const formatDate = (timestamp: firestore.Timestamp) => {
     const d = timestamp.toDate();
     return ("0" + d.getDate()).slice(-2) + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" +
         d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 }
+
 const createFinancials = (invoice: Transaction) => {
     let lines = [];
     let totalAmount = 0;
@@ -121,6 +124,7 @@ export const generatePdf = functions.region('europe-west1').runWith({
     timeoutSeconds: 300,
     memory: '2GB'
 }).https.onRequest(async (request, res) => {
+    //TODO - add apikey authorization
     // const apiKey = request.get('x-api-key');
     const id = request.body.id;
     //create headless chrome

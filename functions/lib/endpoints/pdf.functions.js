@@ -86,7 +86,6 @@ const createFinancials = (invoice) => {
             'btwTarif': line.btwTarif + '%',
             'amount': utils_1.default.formatFinancialAmount(line.amount)
         });
-        console.log(line);
     }
     for (let item of totalBtw) {
         item.btwDisplay = utils_1.default.formatFinancialAmount(item.btw);
@@ -113,6 +112,7 @@ exports.generatePdf = functions.region('europe-west1').runWith({
     timeoutSeconds: 300,
     memory: '2GB'
 }).https.onRequest((request, res) => __awaiter(this, void 0, void 0, function* () {
+    //TODO - add apikey authorization
     // const apiKey = request.get('x-api-key');
     const id = request.body.id;
     //create headless chrome
@@ -136,7 +136,6 @@ exports.generatePdf = functions.region('europe-west1').runWith({
             }
             else {
                 data.financials = createFinancials(data.invoice);
-                console.log(data.financials.btw);
                 const filename = id + ".pdf";
                 res.set('Content-disposition', 'attachment; filename=' + filename);
                 res.type('application/pdf');
