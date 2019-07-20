@@ -5,6 +5,9 @@ const customerFunctions = require("./endpoints/customer.functions");
 const imageFunctions = require("./endpoints/image.functions");
 const transactionFunctions = require("./endpoints/transaction.functions");
 const pdfFunctions = require("./endpoints/pdf.functions");
+const emailFunctions = require("./endpoints/email.functions");
 //import app from './express/server';
-module.exports = Object.assign({}, challengeFunctions, customerFunctions, imageFunctions, transactionFunctions, pdfFunctions);
+module.exports = Object.assign({}, challengeFunctions, customerFunctions, imageFunctions, transactionFunctions, pdfFunctions, emailFunctions
+//api:functions.https.onRequest(app)
+);
 //# sourceMappingURL=index.js.map
