@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const functions = require("firebase-functions");
 //const chromium = require('chrome-aws-lambda');
 const puppeteer = require("puppeteer");
+const sgMail = require("@sendgrid/mail");
 const handlebars = require("handlebars");
 const fs = require("fs-extra");
 const path = require("path");
@@ -35,18 +36,21 @@ const fetchdata = (id) => __awaiter(this, void 0, void 0, function* () {
     // fetch the invoice
     const invoiceSnap = yield context_1.default.db.collection('transactions').doc(id).get();
     const invoice = invoiceSnap.data();
+    console.log(invoice);
     if (invoice === null || invoice === undefined) {
         return null;
     }
     // fetch the user data
     const userSnap = yield context_1.default.db.collection('users').doc(invoice.uid).get();
     const user = userSnap.data();
+    console.log(user);
     if (user === null || user === undefined) {
         return null;
     }
     // fetch the customer data
-    const customerSnap = yield context_1.default.db.collection('users').doc(invoice.uid).collection('customers').doc(invoice.customer.id).get();
+    const customerSnap = yield context_1.default.db.collection('customers').doc(invoice.customer.id).get();
     const customer = customerSnap.data();
+    console.log(customer);
     if (customer === null || customer === undefined) {
         return null;
     }
@@ -118,6 +122,7 @@ exports.generatePdf = functions.region('europe-west1').runWith({
     //create headless chrome
     let result = null;
     let browser = null;
+    const filename = id + ".pdf";
     try {
         // browser = await puppeteer.launch({
         //     args: chromium.args,
@@ -136,9 +141,8 @@ exports.generatePdf = functions.region('europe-west1').runWith({
             }
             else {
                 data.financials = createFinancials(data.invoice);
-                const filename = id + ".pdf";
-                res.set('Content-disposition', 'attachment; filename=' + filename);
-                res.type('application/pdf');
+                // res.set('Content-disposition', 'attachment; filename=' + filename);
+                // res.type('application/pdf');
                 result = yield createPdf(data, browser);
             }
         }
@@ -151,6 +155,31 @@ exports.generatePdf = functions.region('europe-west1').runWith({
             yield browser.close();
         }
     }
-    return res.send(result);
+    //send email
+    const apiKey = functions.config().sendgrid.key;
+    sgMail.setApiKey(apiKey);
+    let base64data = result.toString('base64');
+    const msg = {
+        to: 'toolenaar@gmail.com',
+        from: 'buuq@noreply.io',
+        subject: 'Hier is je factuur',
+        text: 'Hier is je factuur, beter betaal je snel!',
+        html: '<strong>Hier is je factuur, beter betaal je snel!</strong>',
+        attachments: [
+            {
+                content: base64data,
+                filename: filename,
+                type: 'application/pdf',
+                disposition: 'attachment',
+            },
+        ],
+    };
+    sgMail.send(msg).then((response) => {
+        return res.status(200).send(response);
+    }).catch((e) => {
+        console.log(e);
+        return res.status(500).send(e);
+    });
+    //return res.send(result);
 }));
 //# sourceMappingURL=pdf.functions.js.map

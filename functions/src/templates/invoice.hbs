@@ -159,22 +159,22 @@
       <div class="row row--customer-user">
         <div class="col col--half">
           <div class="invoice__customer customer">
-            <p><b template-id="customer-name">{{customer.businessDetails.name}}</b></p>
-            <p template-id="customer-street">{{customer.businessDetails.addressLine}}</p>
-            <p template-id="customer-adres">{{customer.businessDetails.postcode}}, {{customer.businessDetails.city}}</p>
-            <p template-id="customer-email">{{customer.businessDetails.email}}</p>
+            <p><b template-id="customer-name">{{customer.companyName}}</b></p>
+            <p template-id="customer-street">{{customer.address.addressLine}}</p>
+            <p template-id="customer-adres">{{customer.address.postCode}}, {{customer.address.city}}</p>
+            <p template-id="customer-email">{{customer.email}}</p>
           </div>
         </div>
         <div class="col col--half">
           <div class="invoice__user user">
-            <p><b template-id="user-name">{{user.businessDetails.name}}</b></p>
-            <p template-id="user-street">{{user.businessDetails.addressLine}}</p>
-            <p template-id="user-adres">{{customer.businessDetails.postcode}}, {{customer.businessDetails.city}}</p>
-            <p template-id="user-email">{{user.businessDetails.email}}</p>
+            <p><b template-id="user-name">{{user.companyName}}</b></p>
+            <p template-id="user-street">{{user.address.addressLine}}</p>
+            <p template-id="user-adres">{{user.address.postCode}}, {{user.address.city}}</p>
+            <p template-id="user-email">{{user.email}}</p>
             </br>
-            <p>kvk: {{user.businessDetails.kvkNr}}</p>
-            <p>btw: {{user.businessDetails.btwNr}}</p>
-            <p>{{user.businessDetails.bankAccountNr}}</p>
+            <p>kvk: {{user.kvkNr}}</p>
+            <p>btw: {{user.btwNr}}</p>
+            <p>{{user.bankAccountNr}}</p>
           </div>
         </div>
       </div>

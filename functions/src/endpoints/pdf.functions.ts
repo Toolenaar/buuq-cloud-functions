@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 //const chromium = require('chrome-aws-lambda');
 import * as puppeteer from 'puppeteer';
-
+import * as sgMail from '@sendgrid/mail';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -33,7 +33,7 @@ const fetchdata = async (id: string): Promise<any> => {
     // fetch the invoice
     const invoiceSnap = await ctx.db.collection('transactions').doc(id).get();
     const invoice = invoiceSnap.data() as Transaction;
-
+    console.log(invoice);
     if (invoice === null || invoice === undefined) {
         return null;
     }
@@ -41,13 +41,15 @@ const fetchdata = async (id: string): Promise<any> => {
     // fetch the user data
     const userSnap = await ctx.db.collection('users').doc(invoice.uid).get();
     const user = userSnap.data();
+    console.log(user);
     if (user === null || user === undefined) {
         return null;
     }
 
     // fetch the customer data
-    const customerSnap = await ctx.db.collection('users').doc(invoice.uid).collection('customers').doc(invoice.customer.id).get();
+    const customerSnap = await ctx.db.collection('customers').doc(invoice.customer.id).get();
     const customer = customerSnap.data();
+    console.log(customer);
     if (customer === null || customer === undefined) {
         return null;
     }
@@ -130,7 +132,7 @@ export const generatePdf = functions.region('europe-west1').runWith({
     //create headless chrome
     let result = null;
     let browser = null;
-
+    const filename = id + ".pdf";
     try {
         // browser = await puppeteer.launch({
         //     args: chromium.args,
@@ -139,6 +141,7 @@ export const generatePdf = functions.region('europe-west1').runWith({
         //     headless: chromium.headless,
         // });
         browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+     
         if (id === undefined || id === '') {
             res.status(404).send({ error: 'id not valid' });
         } else {
@@ -150,9 +153,9 @@ export const generatePdf = functions.region('europe-west1').runWith({
 
                 data.financials = createFinancials(data.invoice);
                 
-                const filename = id + ".pdf";
-                res.set('Content-disposition', 'attachment; filename=' + filename);
-                res.type('application/pdf');
+                
+                // res.set('Content-disposition', 'attachment; filename=' + filename);
+                // res.type('application/pdf');
 
                 result = await createPdf(data, browser);
             }
@@ -165,7 +168,37 @@ export const generatePdf = functions.region('europe-west1').runWith({
             await browser.close();
         }
     }
+    //send email
 
-    return res.send(result);
+    const apiKey = functions.config().sendgrid.key;
+   
+    sgMail.setApiKey(apiKey);
+
+    let base64data = result.toString('base64');
+
+    const msg = {
+        to: 'toolenaar@gmail.com',
+        from: 'buuq@noreply.io',
+        subject: 'Hier is je factuur',
+        text: 'Hier is je factuur, beter betaal je snel!',
+        html: '<strong>Hier is je factuur, beter betaal je snel!</strong>',
+        attachments: [
+            {
+              content: base64data,
+              filename: filename,
+              type: 'application/pdf',
+              disposition: 'attachment',
+             // contentId: id
+            },
+          ],
+    };
+    sgMail.send(msg).then((response) => {
+        return res.status(200).send(response);
+    }).catch((e) => {
+        console.log(e);
+        return res.status(500).send(e);
+    });
+
+    //return res.send(result);
 
 });
