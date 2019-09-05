@@ -17,6 +17,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const context_1 = require("../logic/context");
 const utils_1 = require("../logic/utils");
+const securityHelper_1 = require("../logic/securityHelper");
 //const admin = require('firebase-admin');
 //https://github.com/GoogleChrome/puppeteer/issues/3120
 //https://handlebarsjs.com/
@@ -118,7 +119,12 @@ exports.generatePdf = functions.region('europe-west1').runWith({
 }).https.onRequest((request, res) => __awaiter(this, void 0, void 0, function* () {
     //TODO - add apikey authorization
     // const apiKey = request.get('x-api-key');
-    const id = request.body.id;
+    const isAuthenticated = yield securityHelper_1.SecurityHelper.isAuthenticated(request);
+    if (!isAuthenticated) {
+        res.status(403).send('Unauthorized');
+        return;
+    }
+    const { id, email, subject, text, html } = request.body;
     //create headless chrome
     let result = null;
     let browser = null;
@@ -138,6 +144,7 @@ exports.generatePdf = functions.region('europe-west1').runWith({
             const data = yield fetchdata(id);
             if (data === null || data.invoice === undefined || data.invoice.type !== 'invoice') {
                 res.status(404).send({ error: 'transaction not found' });
+                return;
             }
             else {
                 data.financials = createFinancials(data.invoice);
@@ -156,15 +163,17 @@ exports.generatePdf = functions.region('europe-west1').runWith({
         }
     }
     //send email
+    if (result == null)
+        return;
     const apiKey = functions.config().sendgrid.key;
     sgMail.setApiKey(apiKey);
     let base64data = result.toString('base64');
     const msg = {
-        to: 'toolenaar@gmail.com',
+        to: email,
         from: 'buuq@noreply.io',
-        subject: 'Hier is je factuur',
-        text: 'Hier is je factuur, beter betaal je snel!',
-        html: '<strong>Hier is je factuur, beter betaal je snel!</strong>',
+        subject: subject,
+        text: text,
+        html: html,
         attachments: [
             {
                 content: base64data,
