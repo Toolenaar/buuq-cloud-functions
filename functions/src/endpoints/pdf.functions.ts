@@ -65,22 +65,22 @@ const formatDate = (timestamp: firestore.Timestamp) => {
 }
 
 const createFinancials = (invoice: Transaction) => {
-    let lines = [];
+    const lines = [];
     let totalAmount = 0;
-    let totalBtw = [];
+    const totalBtw = [];
     //for each line show/calculate
     //amount
     // btw tarif
     // total btw (per tarif)
     // total amount of all
-    for (let line of invoice.lines) {
+    for (const line of invoice.lines) {
         const btw = ((line.amount / 100) * line.btwTarif);
         line.btw = btw;
         line.totalAmount = line.amount + btw;
 
         //for each btw tarif save total amount
         const key = line.btwTarif.toString();
-        let totalBtwItem = totalBtw.find((f) => f.key === key);
+        const totalBtwItem = totalBtw.find((f) => f.key === key);
         if (totalBtwItem === undefined || totalBtwItem === null) {
             totalBtw.push(
                 { 'key': key, 'tarif': line.btwTarif, 'amount' : line.amount, 'btw':btw });
@@ -97,7 +97,7 @@ const createFinancials = (invoice: Transaction) => {
         });
        
     }
-    for (let item of totalBtw) {
+    for (const item of totalBtw) {
         item.btwDisplay = Utils.formatFinancialAmount(item.btw);
         item.display = `${item.tarif}% over ${Utils.formatFinancialAmount(item.amount)}`;
     }
@@ -114,7 +114,8 @@ const createPdf = async (data: any, browser: any): Promise<Buffer> => {
     await page.setContent(content);
     await page.emulateMedia('screen');
     const pdf = await page.pdf({
-        format: 'A4',
+       // format: 'A4',
+        width:600,
         printBackground: true,
         preferCSSPageSize: true
     });
@@ -136,7 +137,6 @@ export const generatePdf = functions.region('europe-west1').runWith({
         return;
     }
 
-  
     const {id,email,subject,text,html} = request.body;
     //create headless chrome
     let result = null;
@@ -163,7 +163,6 @@ export const generatePdf = functions.region('europe-west1').runWith({
 
                 data.financials = createFinancials(data.invoice);
                 
-                
                 // res.set('Content-disposition', 'attachment; filename=' + filename);
                 // res.type('application/pdf');
 
@@ -179,12 +178,12 @@ export const generatePdf = functions.region('europe-west1').runWith({
         }
     }
     //send email
-    if(result == null)return;
+    if(result === null)return;
     const apiKey = functions.config().sendgrid.key;
    
     sgMail.setApiKey(apiKey);
 
-    let base64data = result.toString('base64');
+    const base64data = result.toString('base64');
 
     const msg = {
         to: email,

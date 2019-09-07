@@ -21,8 +21,8 @@
       font-size: 14px;
       line-height: 1.29;
       color: #3d4872;
-      padding: 20px;
-      background-color: #f6fafe;
+      
+      background-color: #ffffff;
     }
 
     p {
@@ -34,7 +34,7 @@
       max-width: 600px;
       border-radius: 5px;
       background-color: #ffffff;
-      box-shadow: 0 0 10px 0 rgba(75, 80, 120, 0.1);
+      /*box-shadow: 0 0 10px 0 rgba(75, 80, 120, 0.1);*/
       padding-bottom: 64px;
     }
 
@@ -241,6 +241,17 @@
           <p template-id="invoice-item-amount" class="text-lg">
             {{financials.total}}
           </p>
+        </div>
+        {{!-- <div class="total row">
+        <p class="col col--half text-md description">Te betalen bedrag incl. BTW</p>
+        <p template-id="invoice-total-amount" class="col col--half text-lg pull-right">
+          {{financials.total}}
+        </p>
+      </div> --}}
+    </section>
+     <section class="container main">
+      <div class="row">
+        <p>We verzoeken u vriendelijk het bovenstaande bedrag van {{financials.total}} binnen 14 dagen te voldoen op onze bankrekening onder vermelding van het factuurnummer {{invoice.nr}}.</p>
         </div>
         {{!-- <div class="total row">
         <p class="col col--half text-md description">Te betalen bedrag incl. BTW</p>

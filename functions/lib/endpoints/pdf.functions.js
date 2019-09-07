@@ -63,21 +63,21 @@ const formatDate = (timestamp) => {
         d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 };
 const createFinancials = (invoice) => {
-    let lines = [];
+    const lines = [];
     let totalAmount = 0;
-    let totalBtw = [];
+    const totalBtw = [];
     //for each line show/calculate
     //amount
     // btw tarif
     // total btw (per tarif)
     // total amount of all
-    for (let line of invoice.lines) {
+    for (const line of invoice.lines) {
         const btw = ((line.amount / 100) * line.btwTarif);
         line.btw = btw;
         line.totalAmount = line.amount + btw;
         //for each btw tarif save total amount
         const key = line.btwTarif.toString();
-        let totalBtwItem = totalBtw.find((f) => f.key === key);
+        const totalBtwItem = totalBtw.find((f) => f.key === key);
         if (totalBtwItem === undefined || totalBtwItem === null) {
             totalBtw.push({ 'key': key, 'tarif': line.btwTarif, 'amount': line.amount, 'btw': btw });
         }
@@ -92,7 +92,7 @@ const createFinancials = (invoice) => {
             'amount': utils_1.default.formatFinancialAmount(line.amount)
         });
     }
-    for (let item of totalBtw) {
+    for (const item of totalBtw) {
         item.btwDisplay = utils_1.default.formatFinancialAmount(item.btw);
         item.display = `${item.tarif}% over ${utils_1.default.formatFinancialAmount(item.amount)}`;
     }
@@ -107,7 +107,8 @@ const createPdf = (data, browser) => __awaiter(this, void 0, void 0, function* (
     yield page.setContent(content);
     yield page.emulateMedia('screen');
     const pdf = yield page.pdf({
-        format: 'A4',
+        // format: 'A4',
+        width: 600,
         printBackground: true,
         preferCSSPageSize: true
     });
@@ -163,11 +164,11 @@ exports.generatePdf = functions.region('europe-west1').runWith({
         }
     }
     //send email
-    if (result == null)
+    if (result === null)
         return;
     const apiKey = functions.config().sendgrid.key;
     sgMail.setApiKey(apiKey);
-    let base64data = result.toString('base64');
+    const base64data = result.toString('base64');
     const msg = {
         to: email,
         from: 'buuq@noreply.io',

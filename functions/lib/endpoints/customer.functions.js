@@ -15,12 +15,16 @@ const utils_1 = require("../logic/utils");
  * when a new customer is added,edited update the details of the user to include total amount earned spent on that customer
  */
 exports.updateCustomer = functions.region('europe-west1').firestore.document('transactions/{id}').onWrite((change, context) => __awaiter(this, void 0, void 0, function* () {
+    console.log('updating customer total expenses');
     const data = utils_1.default.getData(change);
     const eventType = utils_1.default.checkEventType(change);
     const value = yield context_1.default.db.collection('customers').doc(data.customer.id).get();
     const customer = value.data();
+    //check activity ID if activity id is same dont update
+    //else update
     //update overall cost / expese for customer
     const updatedCustomer = yield updateCustomerExpensesCosts(customer, change, eventType);
+    console.log(`updated customer ${updatedCustomer.id}`);
     context_1.default.db.collection('customers').doc(data.customer.id).set(updatedCustomer).then((value2) => {
         // return 
     }).catch((error) => {
@@ -35,18 +39,32 @@ exports.updateCustomer = functions.region('europe-west1').firestore.document('tr
  */
 function updateCustomerExpensesCosts(customer, change, eventType) {
     return __awaiter(this, void 0, void 0, function* () {
-        const transaction = utils_1.default.getData(change);
-        const transactionsForCustomer = yield context_1.default.db.collection('transactions')
-            .where('customer.id', '==', customer.id)
-            .where('isDeleted', '==', false).get();
-        if (transactionsForCustomer.docs.length !== 0) {
-            const transactionList = transactionsForCustomer.docs.map(t => t.data());
-            if (transaction.type === 'invoice') {
-                customer.revenue = transactionList.reduce((a, b) => a + b.amount, 0);
+        //on create add the amount
+        const after = change.after.data();
+        let amount = 0;
+        if (after.type === 'invoice') {
+            amount = customer.revenue == undefined ? 0 : customer.revenue;
+        }
+        else {
+            amount = customer.expenses == undefined ? 0 : customer.expenses;
+        }
+        if (eventType == 'create') {
+            amount += after.amount;
+        }
+        else if (eventType == 'update') {
+            //on edit distract the old and add the new
+            const before = change.before.data();
+            amount -= before.amount;
+            // if isDeleted only distract
+            if (!after.isDeleted) {
+                amount += after.amount;
             }
-            else if (transaction.type === 'expense') {
-                customer.expenses = transactionList.reduce((a, b) => a + b.amount, 0);
-            }
+        }
+        if (after.type === 'invoice') {
+            customer.revenue = amount;
+        }
+        else {
+            customer.expenses = amount;
         }
         return customer;
     });
