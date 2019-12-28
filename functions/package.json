@@ -19,7 +19,7 @@
     "firebase-admin": "^8.4.0",
     "firebase-functions": "3.2.0",
     "fs-extra": "^8.1.0",
-    "handlebars": "^4.2.0",
+    "handlebars": "^4.3.0",
     "iltorb": "^2.4.3",
     "puppeteer": "^1.19.0",
     "puppeteer-core": "^1.19.0",
